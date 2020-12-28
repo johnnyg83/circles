@@ -1,0 +1,4 @@
+.vscode/settings.json
+.vscode/launch.json
+api/app/__pycache__/__init__.cpython-38.pyc
+api/app/__pycache__/routes.cpython-38.pyc
