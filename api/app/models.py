@@ -1,4 +1,7 @@
 from . import db
 class User(db.Document):
-    name = db.StringField()
+    username = db.StringField()
     email = db.StringField()
+    image = db.StringField()
+    interests = db.ListField()
+    
