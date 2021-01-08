@@ -31,7 +31,8 @@ def addUserInterest(user, interest):
         db.session.add(InterestsTable(id=user.id, interest=interest))
         db.session.commit()
 
-def addItemToTable()
+def addItemToTable():
+    pass
 
 def getUserInterests(user):
     return InterestsTable.query.filter_by(id=user.id).all()
