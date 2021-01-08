@@ -1,8 +1,9 @@
+from flask.templating import render_template
 from . import app, db
 from .models import User
 from .models import InterestsTable
 
-@app.route('/')
+@app.route('/') 
 def home():
     johnny_gundo = User(username='johnny_g', email='john.gunderson@yale.edu')
     chrissy_yaodo = User(username='chrissy_y', email='chris.yao@yale.edu')
@@ -23,7 +24,7 @@ def home():
     deleteUserInterest(johnny_gundo, "meat tenderizing")
     print(getUserInterests(johnny_gundo))
 
-    return 'Hello World!'
+    return render_template('home.html')
 
 def addUserInterest(user, interest):
     if len(InterestsTable.query.filter_by(id=user.id, interest=interest).all()) == 0:
@@ -39,5 +40,6 @@ def deleteUserInterest(user, interest):
         db.session.delete(row)
         db.session.commit()
 
-
-
+@app.route('/about')
+def about():
+    return render_template('about.html')
