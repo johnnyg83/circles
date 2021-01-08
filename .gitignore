@@ -7,3 +7,5 @@ api/app/__pycache__/models.cpython-38.pyc
 api/app/__pycache__/config.cpython-38.pyc
 api/app/test.db
 api/app/__pycache__/models.cpython-38.pyc
+api/app/__pycache__/api.cpython-38.pyc
+api/app/__pycache__/util.cpython-38.pyc
