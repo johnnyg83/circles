@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Circles</title>
+        <meta property="og:title" content="Circles">
+        <meta name="viewport" content="width=device-width">
+        <meta name="description" content="to-do">
+        <meta name="author" content="to-do">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta property="og:description" content="to-do">
+        <meta property="og:image" content="to-do">
+        <meta name="theme-color" content="#00356b">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+        <link rel="stylesheet" href="/static/css/api.css">
+        <link rel="icon" href="/static/images/logo/favicon.png" type="image/png">
+        <link rel="icon" href="/static/images/logo/favicon.ico" type="image/x-icon">
+        {% block head %}
+        {% endblock %}
+    </head>
+    <body>
+        <header>
+            <nav>
+                <a class="button outline" href="/">Home</a>
+                <a class="button outline" href="/about">About</a>
+                <a class="button outline" href="/logout/">Log out</a>
+            </nav>
+            <a id="logo" href="/">
+                <img src="/static/images/logo/logo.png" alt="Logo">
+                <h2>Circles</h2>
+            </a>
+        </header>
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+        <footer>
+        </footer>
+    </body>
+</html>
