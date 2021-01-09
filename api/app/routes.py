@@ -5,8 +5,8 @@ from .models import InterestsTable
 
 @app.route('/') 
 def home():
-    johnny_gundo = User(username='johnny_g', email='john.gunderson@yale.edu')
-    chrissy_yaodo = User(username='chrissy_y', email='chris.yao@yale.edu')
+    johnny_gundo = User(id='johnny_g', email='john.gunderson@yale.edu', online=True)
+    chrissy_yaodo = User(id='chrissy_y', email='chris.yao@yale.edu', online=True)
     db.drop_all()
     db.create_all()
     db.session.commit()
@@ -18,6 +18,9 @@ def home():
     print(johnny_gundo.getFriends())
     chrissy_yaodo.deleteFriend(johnny_gundo)
     print(johnny_gundo.getFriends())
+    print(johnny_gundo)
+    johnny_gundo.logout()
+    print(johnny_gundo)
 
     johnny_gundo.addInterest("tennis")
     chrissy_yaodo.addInterest("being epic")

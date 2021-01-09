@@ -1,12 +1,12 @@
 from . import db
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    id = db.Column(db.String(80), primary_key=True) #username
     email = db.Column(db.String(120), unique=True, nullable=False)
+    online = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r %r %r>' % (self.id, self.email, self.online)
 
     def addInterest(self, interest):
         if len(InterestsTable.query.filter_by(id=self.id, interest=interest).all()) == 0:
@@ -35,18 +35,26 @@ class User(db.Model):
         if row is not None:
             db.session.delete(row)
             db.session.commit()
+    
+    def login(self):
+        self.online = True
+        db.session.commit()
+    
+    def logout(self):
+        self.online = False
+        db.session.commit()
 
 
 class InterestsTable(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    interest = db.Column(db.String(1000), primary_key=True)
+    id = db.Column(db.String(80), primary_key=True)
+    interest = db.Column(db.String(100), primary_key=True)
 
     def __repr__(self):
         return '<InterestsTable %r %r>' % (self.id, self.interest)
 
 class FriendsTable(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    friend_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(80), primary_key=True)
+    friend_id = db.Column(db.String(80), primary_key=True)
 
     # if username=='johnny_g':
     #     friends = 0
