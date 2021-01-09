@@ -14,28 +14,28 @@ def home():
     db.session.add(chrissy_yaodo)
     db.session.commit()
 
-    johnny_gundo.addFriend(chrissy_yaodo)
-    print(johnny_gundo.getFriends())
-    chrissy_yaodo.deleteFriend(johnny_gundo)
-    print(johnny_gundo.getFriends())
+    johnny_gundo.add_friend(chrissy_yaodo)
+    print(johnny_gundo.get_friends())
+    chrissy_yaodo.delete_friend(johnny_gundo)
+    print(johnny_gundo.get_friends())
     print(johnny_gundo)
     johnny_gundo.logout()
     print(johnny_gundo)
 
-    johnny_gundo.addInterest("tennis")
-    chrissy_yaodo.addInterest("being epic")
-    chrissy_yaodo.deleteInterest("sucking")
-    print(chrissy_yaodo.getInterests())
+    johnny_gundo.add_interest("tennis")
+    chrissy_yaodo.add_interest("being epic")
+    chrissy_yaodo.delete_interest("sucking")
+    print(chrissy_yaodo.get_interests())
 
-    johnny_gundo.addInterest("tennis")
-    johnny_gundo.addInterest("reading")
-    print(johnny_gundo.getInterests())
+    johnny_gundo.add_interest("tennis")
+    johnny_gundo.add_interest("reading")
+    print(johnny_gundo.get_interests())
 
-    johnny_gundo.addInterest("meat tenderizing")
-    print(johnny_gundo.getInterests())
+    johnny_gundo.add_interest("meat tenderizing")
+    print(johnny_gundo.get_interests())
 
-    johnny_gundo.deleteInterest("meat tenderizing")
-    print(johnny_gundo.getInterests())
+    johnny_gundo.delete_interest("meat tenderizing")
+    print(johnny_gundo.get_interests())
 
     return render_template('home.html')
 

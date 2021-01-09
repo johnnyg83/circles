@@ -1,5 +1,9 @@
-from flask import Blueprint
+from flask import Blueprint, request, jsonify
+from . import db
+from .models import User
 from util import fail, succ
+from Levenshtein import distance
+from itertools import product
 api_bp = Blueprint('api', __name__)
 
 @api_bp.errorhandler(404)
@@ -25,3 +29,55 @@ def internal(error):
 def home():
     return "Hello API!"
 
+#TODO: authentication
+
+@api_bp.route('/user/data', methods=['POST'])
+def user_data():
+    if 'id' in request.args:
+        id = request.args['id']
+    else:
+        return "Error: No id field provided. Please specify an id."
+    user = User.query.get(id)
+    if user is None:
+        return "Error: No user found with given id"
+    data = user.get_all_data()
+    return jsonify(data)
+
+@api_bp.route('/user/match', methods=['POST'])
+def match():
+    if 'id' in request.args:
+        id = request.args['id']
+    else:
+        return "Error: No id field provided. Please specify an id."
+    user = User.query.get(id)
+    if user is None:
+        return "Error: No user found with given id"
+    threshold = 4
+    #list of all other users
+    all_users = User.query.all()
+
+    #store (id, num_matching_interests, matching_interests)
+    interest_matches = [(u.id,) + get_interest_matches(user.get_interests(), u.get_interests(), threshold) for u in all_users]
+
+    sorted_matches = sorted(interest_matches, key= lambda x: x[1], reverse=True)
+
+    data = {'ids':[x[0] for x in sorted_matches], 'n_matches': [x[1] for x in sorted_matches],  'common_interests': [x[2] for x in 
+            sorted_matches]}
+
+    return jsonify(data)
+
+def get_interest_matches(l1, l2, threshold):
+    #return the number of matching interests between l1, l2 where a match is where distance(x, y) < threshold
+    #and the matches themselves
+    combinations = list(product(l1, l2))
+    distances = [(distance(x[0], x[1]), x) for x in combinations]
+    sorted_matches_with_distances = sorted(distances, key=lambda x:x[0])
+    print(sorted_matches_with_distances)
+    n_matches = 0
+    matches = []
+    for x in sorted_matches_with_distances:
+        if x[0] < threshold:
+            n_matches += 1
+            matches.append(x[1])
+
+    return n_matches, matches
