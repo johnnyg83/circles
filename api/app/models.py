@@ -6,12 +6,31 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
     image = db.Column(db.String(120), unique=False, nullable=True)
-    online = db.Column(db.Boolean, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
+    authenticated = db.Column(db.Boolean, default=False)
 
+    def is_active(self):
+        """True, as all users are active."""
+        return True
+
+    def get_email(self):
+        """Return the email address to satisfy Flask-Login's requirements."""
+        return self.email
+
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+
+    def is_anonymous(self):
+        """False, as anonymous users aren't supported."""
+        return False
+        
     def __repr__(self):
-        return '<User %r %r %r %r %r>' % (self.id, self.email, self.name, self.online, self.last_login)
+        return '<User %r %r %r %r %r>' % (self.id, self.email, self.name, self.authenticated, self.last_login)
 
+    def get_id(self):
+        return str(self.id)
+        
     def add_interest(self, interest):
         if len(InterestsTable.query.filter_by(id=self.id, interest=interest).all()) == 0:
             db.session.add(InterestsTable(id=self.id, interest=interest))
@@ -39,15 +58,6 @@ class User(db.Model):
         if row is not None:
             db.session.delete(row)
             db.session.commit()
-    
-    def login(self):
-        self.online = True
-        self.last_login = dt.now()
-        db.session.commit()
-    
-    def logout(self):
-        self.online = False
-        db.session.commit()
     
     def get_all_data(self):
         data = {'id': self.id, 'email': self.email, 'name': self.name, 'image': self.image, 'online': self.online, 'interests': self.get_interests(), 
