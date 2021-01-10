@@ -109,12 +109,14 @@ def logout():
 def home():
     db.drop_all()
     db.create_all()
-    # johnny_gundo = User(id='johnny_g', email='john.gunderson@yale.edu')
-    # chrissy_yaodo = User(id='chrissy_y', email='chris.yao@yale.edu')
+    # johnny_gundo = User(id='johnny_g', email='john.gunderson@yale.edu', name='jg', authenticated=True)
+    # chrissy_yaodo = User(id='chrissy_y', email='chris.yao@yale.edu', name='cy', authenticated=True)
     # db.session.commit()
     # db.session.add(johnny_gundo)
     # db.session.add(chrissy_yaodo)
     # db.session.commit()
+    # johnny_gundo.add_match(chrissy_yaodo)
+    # print(johnny_gundo.get_matches())
 
     # johnny_gundo.add_friend(chrissy_yaodo)
     # print(johnny_gundo.get_friends())

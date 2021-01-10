@@ -30,7 +30,7 @@ class User(db.Model):
 
     def get_id(self):
         return str(self.id)
-        
+
     def add_interest(self, interest):
         if len(InterestsTable.query.filter_by(id=self.id, interest=interest).all()) == 0:
             db.session.add(InterestsTable(id=self.id, interest=interest))
@@ -58,10 +58,16 @@ class User(db.Model):
         if row is not None:
             db.session.delete(row)
             db.session.commit()
+
+    def add_match(self, match):
+        db.session.add(MatchesTable(id=self.id, match_id=match.id, match_time=dt.now()))
+
+    def get_matches(self):
+        return [(x.match_id, x.match_time) for x in MatchesTable.query.filter_by(id=self.id).all()]
     
     def get_all_data(self):
         data = {'id': self.id, 'email': self.email, 'name': self.name, 'image': self.image, 'online': self.online, 'interests': self.get_interests(), 
-        'friends': self.get_friends(), "last_login": self.last_login}
+        'friends': self.get_friends(), "last_login": self.last_login, 'matches': self.get_matches()}
         return data
 
 class InterestsTable(db.Model):
@@ -80,4 +86,12 @@ class FriendsTable(db.Model):
 
     def __repr__(self):
         return '<FriendsTable %r %r>' % (self.id, self.friend_id)
+
+class MatchesTable(db.Model):
+    id = db.Column(db.String(80), primary_key=True)
+    match_id = db.Column(db.String(80), primary_key=True)
+    match_time = db.Column(db.DateTime(), primary_key=True)
+
+    def __repr__(self):
+        return '<MatchesTable %r %r>' % (self.id, self.match_id, self.match_time)
 
