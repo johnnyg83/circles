@@ -1,13 +1,16 @@
 from . import db
+from datetime import datetime as dt
 
 class User(db.Model):
     id = db.Column(db.String(80), primary_key=True) #username
     email = db.Column(db.String(120), unique=True, nullable=False)
+    name = db.Column(db.String(120), nullable=False)
     image = db.Column(db.String(120), unique=False, nullable=True)
     online = db.Column(db.Boolean, nullable=False)
+    last_login = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
-        return '<User %r %r %r>' % (self.id, self.email, self.online)
+        return '<User %r %r %r %r %r>' % (self.id, self.email, self.name, self.online, self.last_login)
 
     def add_interest(self, interest):
         if len(InterestsTable.query.filter_by(id=self.id, interest=interest).all()) == 0:
@@ -39,6 +42,7 @@ class User(db.Model):
     
     def login(self):
         self.online = True
+        self.last_login = dt.now()
         db.session.commit()
     
     def logout(self):
@@ -46,10 +50,9 @@ class User(db.Model):
         db.session.commit()
     
     def get_all_data(self):
-        data = {'id': self.id, 'email': self.email, 'image': self.image, 'online': self.online, 'interests': self.getInterests(), 
-        'friends': self.getFriends()}
+        data = {'id': self.id, 'email': self.email, 'name': self.name, 'image': self.image, 'online': self.online, 'interests': self.get_interests(), 
+        'friends': self.get_friends(), "last_login": self.last_login}
         return data
-
 
 class InterestsTable(db.Model):
     id = db.Column(db.String(80), primary_key=True)
