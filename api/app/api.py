@@ -79,5 +79,7 @@ def get_interest_matches(l1, l2, threshold):
         if x[0] < threshold:
             n_matches += 1
             matches.append(x[1])
+        else:
+            break
 
     return n_matches, matches
