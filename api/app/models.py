@@ -58,6 +58,26 @@ class User(db.Model):
         if row is not None:
             db.session.delete(row)
             db.session.commit()
+    
+    def block_user(self, user):
+        if len(BlockedUsersTable.query.filter_by(id=self.id, blocked_user_id=user.id).all()) == 0:
+            db.session.add(BlockedUsersTable(id=self.id, blocked_user_id=user.id))
+            db.session.commit()
+
+    def get_blocked_users(self): 
+        """Return the other users who the user has blocked."""
+        #if name=="chris": return Aruni.id
+        return [x.blocked_user_id for x in BlockedUsersTable.query.filter_by(id=self.id).all()]
+    
+    def get_who_has_blocked(self): #sorry for awkward name
+        """Return the other users who have blocked the user"""
+        return [x.id for x in BlockedUsersTable.query.filter_by(blocked_user_id=self.id).all()]
+
+    def unblock_user(self, user):
+        row = BlockedUsersTable.query.filter_by(id=self.id, blocked_user_id=user.id).first()
+        if row is not None:
+            db.session.delete(row)
+            db.session.commit()
 
     def add_match(self, match):
         db.session.add(MatchesTable(id=self.id, match_id=match.id, match_time=dt.now()))
@@ -66,8 +86,10 @@ class User(db.Model):
         return [(x.match_id, x.match_time) for x in MatchesTable.query.filter_by(id=self.id).all()]
     
     def get_all_data(self):
-        data = {'id': self.id, 'email': self.email, 'name': self.name, 'image': self.image, 'online': self.online, 'interests': self.get_interests(), 
-        'friends': self.get_friends(), "last_login": self.last_login, 'matches': self.get_matches()}
+        data = {'id': self.id, 'email': self.email, 'name': self.name, 'image': self.image, 
+        'authenticated': self.authenticated, 'interests': self.get_interests(), 'friends': self.get_friends(), 
+        "last_login": self.last_login, 'matches': self.get_matches(), 'blocked_users': self.get_blocked_users(),
+        'who_has_blocked': self.get_who_has_blocked()}
         return data
 
 class InterestsTable(db.Model):
@@ -95,3 +117,9 @@ class MatchesTable(db.Model):
     def __repr__(self):
         return '<MatchesTable %r %r>' % (self.id, self.match_id, self.match_time)
 
+class BlockedUsersTable(db.Model):
+    id = db.Column(db.String(80), primary_key=True)
+    blocked_user_id = db.Column(db.String(80), primary_key=True)
+
+    def __repr__(self):
+        return '<BlockedUserTable %r %r>' % (self.id, self.blocked_user_id)
