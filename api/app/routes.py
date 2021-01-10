@@ -1,10 +1,12 @@
 from flask.templating import render_template
 from . import app, db, login_manager, auth_client
-from .models import User
+from .models import BannedUsersTable, User, get_banned_users
 from .models import InterestsTable
+from .models import ban_user, unban_user, get_banned_users
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import request, redirect, json, url_for
 import requests
+from datetime import datetime as dt
 
 
 @app.route("/")
@@ -105,10 +107,26 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-@app.route('/test_db') 
+@app.route('/test') 
 def home():
-    db.drop_all()
-    db.create_all()
+    # db.drop_all()
+    # db.create_all()
+    # chris = User.query.filter_by(email="chris.yao@yale.edu").first()
+    # print(chris.id)
+    # ban_user(chris.id, dt(2037, 1, 1, 1, 1, 1))
+    # ban_user(chris.id, dt(2035, 1, 1, 1, 1, 1))
+    # print("banned: ", get_banned_users())
+    # unban_user(chris.id)
+    # print("banned: ", get_banned_users())
+
+    # chris = User.query.filter_by(email="chris.yao@yale.edu").first()
+    # print(chris)
+    # chris.add_interest("tennis")
+    # chris.add_interest("eating")
+    # print(InterestsTable.query.all())
+    # chris.delete_user()
+    # print(User.query.filter_by(email="chris.yao@yale.edu").first())
+    # print(InterestsTable.query.all())
     # johnny_gundo = User(id='johnny_g', email='john.gunderson@yale.edu', name='jg', authenticated=True)
     # chrissy_yaodo = User(id='chrissy_y', email='temp', name='cy', authenticated=True)
     # db.session.commit()

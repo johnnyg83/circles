@@ -8,6 +8,7 @@ class User(db.Model):
     image = db.Column(db.String(120), unique=False, nullable=True)
     last_login = db.Column(db.DateTime, nullable=True)
     authenticated = db.Column(db.Boolean, default=False)
+    privacy_setting = db.Column(db.String(20), default="0") #could either be one number, or a "string array" of 1s and 0s for each setting
 
     def is_active(self):
         """True, as all users are active."""
@@ -31,8 +32,11 @@ class User(db.Model):
     def get_id(self):
         return str(self.id)
 
+    def get_privacy_setting(self):
+        return self.privacy_setting
+
     def add_interest(self, interest):
-        if len(InterestsTable.query.filter_by(id=self.id, interest=interest).all()) == 0:
+        if InterestsTable.query.filter_by(id=self.id, interest=interest).first() is None:
             db.session.add(InterestsTable(id=self.id, interest=interest))
             db.session.commit()
 
@@ -46,7 +50,7 @@ class User(db.Model):
             db.session.commit()
     
     def add_friend(self, friend):
-        if len(FriendsTable.query.filter_by(id=self.id, friend_id=friend.id).all()) == 0:
+        if FriendsTable.query.filter_by(id=self.id, friend_id=friend.id).first() is None:
             db.session.add(FriendsTable(id=self.id, friend_id=friend.id))
             db.session.commit()
 
@@ -60,7 +64,7 @@ class User(db.Model):
             db.session.commit()
     
     def block_user(self, user):
-        if len(BlockedUsersTable.query.filter_by(id=self.id, blocked_user_id=user.id).all()) == 0:
+        if BlockedUsersTable.query.filter_by(id=self.id, blocked_user_id=user.id).first is None:
             db.session.add(BlockedUsersTable(id=self.id, blocked_user_id=user.id))
             db.session.commit()
 
@@ -69,7 +73,7 @@ class User(db.Model):
         #if name=="chris": return Aruni.id
         return [x.blocked_user_id for x in BlockedUsersTable.query.filter_by(id=self.id).all()]
     
-    def get_who_has_blocked(self): #sorry for awkward name
+    def get_blocked_by(self): #sorry for awkward name
         """Return the other users who have blocked the user"""
         return [x.id for x in BlockedUsersTable.query.filter_by(blocked_user_id=self.id).all()]
 
@@ -79,17 +83,41 @@ class User(db.Model):
             db.session.delete(row)
             db.session.commit()
 
+    def report_user(self, user):
+        if ReportsTable.query.filter_by(reporter_id=self.id, reported_id=user.id, time=dt.now()).first() is None:
+            db.session.add(ReportsTable(reporter_id=self.id, reported_id=user.id, time=dt.now()))
+            db.session.commit()
+
+    def get_reported_users(self):
+        """Return the other users who the user has reported."""
+        return [(x.reported_id, x.time) for x in ReportsTable.query.filter_by(reporter_id=self.id).all()]
+
+    def get_reported_by(self): #sorry for awkward name
+        """Return the other users who have reported the user"""
+        return [(x.reporter_id, x.time) for x in ReportsTable.query.filter_by(reported_id=self.id).all()]
+
     def add_match(self, match):
-        db.session.add(MatchesTable(id=self.id, match_id=match.id, match_time=dt.now()))
+        if MatchesTable.query.filter_by(id=self.id, match_id=match.id, match_time=dt.now()).first() is None:
+            db.session.add(MatchesTable(id=self.id, match_id=match.id, match_time=dt.now()))
+            db.session.commit()
 
     def get_matches(self):
         return [(x.match_id, x.match_time) for x in MatchesTable.query.filter_by(id=self.id).all()]
+
+    def delete_user(self):
+        interests = InterestsTable.query.filter_by(id=self.id)
+        for interest in interests:
+            db.session.delete(interest)
+        db.session.delete(self)
+        db.session.commit()
+        #not deleting matches or friends for now
     
     def get_all_data(self):
         data = {'id': self.id, 'email': self.email, 'name': self.name, 'image': self.image, 
         'authenticated': self.authenticated, 'interests': self.get_interests(), 'friends': self.get_friends(), 
-        "last_login": self.last_login, 'matches': self.get_matches(), 'blocked_users': self.get_blocked_users(),
-        'who_has_blocked': self.get_who_has_blocked()}
+        "last_login": self.last_login, 'matches': self.get_matches(), 
+        'blocked_users': self.get_blocked_users(), 'blocked_by': self.get_blocked_by(), 
+        'reported_users': self.get_reported_users(), 'reported_by': self.get_reported_by()}
         return data
 
 class InterestsTable(db.Model):
@@ -123,3 +151,34 @@ class BlockedUsersTable(db.Model):
 
     def __repr__(self):
         return '<BlockedUserTable %r %r>' % (self.id, self.blocked_user_id)
+
+class ReportsTable(db.Model):
+    reporter_id = db.Column(db.String(80), primary_key=True)
+    reported_id = db.Column(db.String(80), primary_key=True)
+    time = db.Column(db.DateTime(), primary_key=True)
+
+    def __repr__(self):
+        return '<ReportsTable %r %r %r>' % (self.reported_id, self.reporter_id, self.time)
+
+class BannedUsersTable(db.Model):
+    id = db.Column(db.String(80), primary_key=True)
+    time_banned = db.Column(db.DateTime(), primary_key=True)
+    time_unbanned = db.Column(db.DateTime(), primary_key=True)
+
+    def __repr__(self):
+        return '<BannedUsersTable %r %r %r>' % (self.id, self.time_banned, self.time_unbanned)
+
+def ban_user(user_id, time_unbanned):
+    if BannedUsersTable.query.filter_by(id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned).first() is None:
+        db.session.add(BannedUsersTable(id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned))
+        db.session.commit()
+
+def unban_user(user_id):
+    bans = BannedUsersTable.query.filter(BannedUsersTable.id==user_id, BannedUsersTable.time_unbanned > dt.now())
+    #TODO may need to fix this? getattr and setattr are things idk ill figure it out later
+    for ban in bans:
+        ban.time_unbanned = dt.now()
+    db.session.commit()
+
+def get_banned_users():
+    return [(x.id, x.time_banned, x.time_unbanned) for x in BannedUsersTable.query.all()]
