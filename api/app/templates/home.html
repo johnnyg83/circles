@@ -1,5 +1,42 @@
 {% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/home.css">
+{% endblock %}
 
 {% block content %}
-<h1>Home<h1>
+{% if not authenticated %}
+<div id="my-signin2" onclick="location.href='/login';">
+</div>
+
+{% else %}
+
+<div class="interests-box">
+  <div class="mdc-chip-set mdc-chip-set--input" role="grid">
+    <div class="mdc-chip" role="row">
+      <div class="mdc-chip__ripple"></div>
+      <span role="gridcell">
+        <span role="button" tabindex="0" class="mdc-chip__primary-action">
+          <span class="mdc-chip__text">Jane Smith</span>
+        </span>
+      </span>
+      <span role="gridcell">
+        <i class="material-icons mdc-chip__icon mdc-chip__icon --trailing mdc-chip-trailing-action" tabindex="-1" role="button">cancel</i>
+      </span>
+    </div>
+    <div class="mdc-chip" role="row">
+      <div class="mdc-chip__ripple"></div>
+      <span role="gridcell">
+        <span role="button" tabindex="-1" class="mdc-chip__primary-action">
+          <span class="mdc-chip__text">Chip Two</span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+<div class="match-button"></div>
+{% endif %}
+<script>
+  const chipSetEl = document.querySelector('.mdc-chip-set');
+  const chipSet = new mdc.chips.MDCChipSet(chipSetEl);
+</script>
 {% endblock %}
