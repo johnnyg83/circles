@@ -1,7 +1,7 @@
 from flask.templating import render_template
 from . import app, db, login_manager, auth_client
-from .models import BannedUsersTable, User, get_banned_users
-from .models import InterestsTable
+from .models import BannedUser, BlockedUser, Friend, Match, User, get_banned_users
+from .models import Interest
 from .models import ban_user, unban_user, get_banned_users
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import request, redirect, json, url_for
@@ -109,60 +109,62 @@ def logout():
 
 @app.route('/test') 
 def home():
-    # db.drop_all()
-    # db.create_all()
-    # chris = User.query.filter_by(email="chris.yao@yale.edu").first()
-    # print(chris.id)
-    # ban_user(chris.id, dt(2037, 1, 1, 1, 1, 1))
-    # ban_user(chris.id, dt(2035, 1, 1, 1, 1, 1))
-    # print("banned: ", get_banned_users())
-    # unban_user(chris.id)
-    # print("banned: ", get_banned_users())
+    db.drop_all()
+    db.create_all()
+    chris = User(id="chris", name="chris", email="chris.yao@yale.edu")
+    john = User(id="john", name="chris", email="john.gunderson@yale.edu")
+    boy = User(id="boy", name="chris", email="boy.gunderson@yale.edu")
+    juice = User(id="juice", name="chris", email="juice.gunderson@yale.edu")
+    db.session.add(chris)
+    db.session.add(john)
+    db.session.add(boy)
+    db.session.add(juice)
+    db.session.commit()
+    # chris.add_interest(interest="tennis", rank=1)
+    # chris.add_interest(interest="tennis", rank=1)
+    # chris.add_interest(interest="breathing", rank=2)
+    # db.session.add(Interest(user_id=chris.id, interest="tennis", rank=1))
+    # db.session.add(Interest(user_id=chris.id, interest="tennis", rank=1))
+    # db.session.add(Interest(user_id=chris.id, interest="breahting", rank=3))
+    # db.session.add(Interest(user_id=chris.id, interest="sleep", rank=4))
 
-    # chris = User.query.filter_by(email="chris.yao@yale.edu").first()
-    # print(chris)
-    # chris.add_interest("tennis")
-    # chris.add_interest("eating")
-    # print(InterestsTable.query.all())
-    # chris.delete_user()
-    # print(User.query.filter_by(email="chris.yao@yale.edu").first())
-    # print(InterestsTable.query.all())
-    # johnny_gundo = User(id='johnny_g', email='john.gunderson@yale.edu', name='jg', authenticated=True)
-    # chrissy_yaodo = User(id='chrissy_y', email='temp', name='cy', authenticated=True)
-    # db.session.commit()
-    # db.session.add(johnny_gundo)
-    # db.session.add(chrissy_yaodo)
-    # db.session.commit()
-    # johnny_gundo.block_user(chrissy_yaodo)
-    # print(johnny_gundo.get_all_data())
-    # print(chrissy_yaodo.get_all_data())
+    chris.add_friend(john)
+    john.add_friend(chris)
+    # db.session.add(Match(user_id=chris.id, match_id=john.id, time=dt.now()))
+    # db.session.add(BlockedUser(user_id=chris.id, blocked_user_id=john.id))
+    chris.add_interest("surfing", 1)
+    chris.add_interest("surfing", 1)
+    chris.add_interest("surfing", 1)
+    chris.add_interest("surfing", 1)
+    chris.add_interest("surfing", 1)
+    chris.add_interest("eating", 2)
+    chris.add_interest("mokdf", 1)
+    chris.delete_interest("mokdf", 1)
+    chris.delete_interest("eating", 2)
+    chris.delete_interest("penis", 3)
 
+    chris.block_user(john)
+    chris.block_user(boy)
+    boy.block_user(chris)
+    juice.block_user(chris)
+    juice.unblock_user(chris)
+    chris.unblock_user(juice)
+    chris.report_user(boy, "A")
+    boy.report_user(boy, "b")
+    chris.report_user(boy, "c")
+    chris.add_match(boy)
 
-    # johnny_gundo.add_match(chrissy_yaodo)
-    # print(johnny_gundo.get_matches())
+    chris.delete_friend(john)
+    boy.delete_user()
+    print(BlockedUser.query.all())
+    # db.session.delete(chris)
+    db.session.commit()
 
-    # johnny_gundo.add_friend(chrissy_yaodo)
-    # print(johnny_gundo.get_friends())
-    # chrissy_yaodo.delete_friend(johnny_gundo)
-    # print(johnny_gundo.get_friends())
-    # print(johnny_gundo)
-    # johnny_gundo.logout()
-    # print(johnny_gundo)
+    
 
-    # johnny_gundo.add_interest("tennis")
-    # chrissy_yaodo.add_interest("being epic")
-    # chrissy_yaodo.delete_interest("sucking")
-    # print(chrissy_yaodo.get_interests())
+    print(chris.get_all_data())
+    # print(boy.get_reported_by())
 
-    # johnny_gundo.add_interest("tennis")
-    # johnny_gundo.add_interest("reading")
-    # print(johnny_gundo.get_interests())
-
-    # johnny_gundo.add_interest("meat tenderizing")
-    # print(johnny_gundo.get_interests())
-
-    # johnny_gundo.delete_interest("meat tenderizing")
-    # print(johnny_gundo.get_interests())
 
     return render_template('home.html')
 
