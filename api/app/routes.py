@@ -10,18 +10,8 @@ from datetime import datetime as dt
 
 
 @app.route("/")
-def index():
-    if current_user.is_authenticated:
-        return (
-            "<p>Hello, {}! You're logged in! Email: {}</p>"
-            "<div><p>Google Profile Picture:</p>"
-            '<img src="{}" alt="Google profile pic"></img></div>'
-            '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email, current_user.image
-            )
-        )
-    else:
-        return '<a class="button" href="/login">Google Login</a>'
+def home():
+    return render_template('home.html', authenticated=current_user.is_authenticated)
 
 @app.route('/login')
 def login():
@@ -92,25 +82,26 @@ def callback():
 
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for("index"))
+        login_user(user)
+        return redirect(url_for("home"))
     else:
         # Begin user session by logging the user in
         existing_user.authenticated=True
         login_user(existing_user)
         db.session.commit()
         # Send user back to homepage
-        return redirect(url_for("index"))
+        return redirect(url_for("home"))
 
-@app.route("/logout")
+@app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index"))
+    return redirect(url_for("home"))
 
 @app.route('/test') 
-def home():
-    # db.drop_all()
-    # db.create_all()
+def test():
+    db.drop_all()
+    db.create_all()
     # chris = User.query.filter_by(email="chris.yao@yale.edu").first()
     # print(chris.id)
     # ban_user(chris.id, dt(2037, 1, 1, 1, 1, 1))

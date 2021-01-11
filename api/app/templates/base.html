@@ -21,15 +21,13 @@
     </head>
     <body>
         <header>
-            <nav>
-                <a class="button outline" href="/">Home</a>
-                <a class="button outline" href="/about">About</a>
-                <a class="button outline" href="/logout/">Log out</a>
-            </nav>
             <a id="logo" href="/">
                 <img src="/static/images/logo/logo.png" alt="Logo">
                 <h2>Circles</h2>
             </a>
+            <nav>
+                <a class="logout-button" href="/logout">Log out</a>
+            </nav>
         </header>
         <main>
             {% block content %}

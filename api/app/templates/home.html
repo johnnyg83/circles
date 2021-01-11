@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Home<h1>
+{% if not authenticated %}
+<div id="my-signin2" onclick="location.href='/login';">
+</div>
+
+{% else %}
+<div class="interests-box"></div>
+<div class="match-button"></div>
+{% endif %}
+
 {% endblock %}
