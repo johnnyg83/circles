@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from . import db
-from .models import User
+from .models import User, Interest
 from util import fail, succ
 from Levenshtein import distance
 from itertools import product
@@ -29,6 +29,13 @@ def internal(error):
 def home():
     return "Hello API!"
 
+@api_bp.route('/all/interests', methods=['POST'])
+def get_all_interests():
+    all_interests = Interest.query.all()
+    all_interests = list(set([x.interest for x in all_interests]))
+    data = {'all_interests': all_interests}
+    return jsonify(data)
+
 #TODO: authentication
 
 @api_bp.route('/user/data', methods=['POST'])
@@ -43,6 +50,36 @@ def user_data():
     data = user.get_all_data()
     return jsonify(data)
 
+@api_bp.route('/user/addinterest', methods=['POST'])
+def add_user_interest():
+    if 'id' in request.args:
+        id = request.args['id']
+    else:
+        return "Error: No id field provided. Please specify an id."
+    
+    if 'interest' in request.args:
+        interest = request.args['interest']
+    else:
+        return "Error: No interest field provided. Please specify an interest to add."
+
+    user = User.query.get(id)
+    return str(user.add_interest(interest, 0))
+
+@api_bp.route('/user/deleteinterest', methods=['POST'])
+def delete_user_interest():
+    if 'id' in request.args:
+        id = request.args['id']
+    else:
+        return "Error: No id field provided. Please specify an id."
+    
+    if 'interest' in request.args:
+        interest = request.args['interest']
+    else:
+        return "Error: No interest field provided. Please specify an interest to add."
+
+    user = User.query.get(id)
+    return str(user.delete_interest(interest, 0))
+    
 @api_bp.route('/user/match', methods=['POST'])
 def match():
     if 'id' in request.args:
