@@ -33,6 +33,14 @@ class User(db.Model):
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
         return False
+    
+    def is_banned(self):
+        bans = get_banned_users()
+        print(bans)
+        for ban in bans:
+            if self.id==ban[0] and dt.now() < ban[2]:
+                return True
+        return False
         
     def __repr__(self):
         return '<User %r %r %r %r %r>' % (self.id, self.email, self.name, self.authenticated, self.last_login)
@@ -53,12 +61,16 @@ class User(db.Model):
             instance = model(**kwargs)
             db.session.add(instance)
             db.session.commit()
+            return True
+        return False
 
     def delete_instance(self, model, **kwargs):
         instance = self.get_instance(model, **kwargs)
         if instance is not None:
             db.session.delete(instance)
             db.session.commit()
+            return True
+        return False
     
     def get_all_instances(self, model, **kwargs):
         """Return a list of all instances in model that fit the kwargs"""
@@ -68,8 +80,7 @@ class User(db.Model):
         max_interests = 25
         if len(self.interests) >= 25:
             return False
-        self.add_instance(Interest, user_id=self.id, interest=interest, rank=rank)
-        return True
+        return self.add_instance(Interest, user_id=self.id, interest=interest, rank=rank)
 
     def get_interests(self):
         return [x.interest for x in self.interests]
@@ -127,7 +138,8 @@ class User(db.Model):
         'authenticated': self.authenticated, 'interests': self.get_interests(), 'friends': self.get_friends(), 
         "last_login": self.last_login, 'matches': self.get_matches(), 
         'blocked_users': self.get_blocked_users(), 'blocked_by': self.get_blocked_by(), 
-        'reported_users': self.get_reported_users(), 'reported_by': self.get_reported_by()}
+        'reported_users': self.get_reported_users(), 'reported_by': self.get_reported_by(),
+        'banned': self.is_banned()}
         return data
 
 class Interest(db.Model):
@@ -209,17 +221,18 @@ class BannedUser(db.Model):
     def __repr__(self):
         return '<BannedUser %r %r %r %r>' % (self.user_id, self.time_banned, self.time_unbanned, self.reason)
 
-def ban_user(user_id, time_unbanned):
-    if BannedUser.query.filter_by(id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned).first() is None:
-        db.session.add(BannedUser(id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned))
+def ban_user(user_id, time_unbanned, reason):
+    if BannedUser.query.filter_by(user_id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned, reason=reason).first() is None:
+        db.session.add(BannedUser(user_id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned, reason=reason))
         db.session.commit()
 
 def unban_user(user_id):
-    bans = BannedUser.query.filter(BannedUser.id==user_id, BannedUser.time_unbanned > dt.now())
+    bans = BannedUser.query.filter(BannedUser.user_id==user_id, BannedUser.time_unbanned > dt.now())
     #TODO may need to fix this? getattr and setattr are things idk ill figure it out later
     for ban in bans:
         ban.time_unbanned = dt.now()
+        print('unban: ', ban)
     db.session.commit()
 
 def get_banned_users():
-    return [(x.id, x.time_banned, x.time_unbanned) for x in BannedUser.query.all()]
+    return [(x.user_id, x.time_banned, x.time_unbanned) for x in BannedUser.query.all()]

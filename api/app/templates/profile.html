@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1> Profile </h1>
+
+{% if not authenticated %}
+<div id="my-signin2" onclick="location.href='/login';">
+</div>
+
+{% else %}
+<main>
+    <div id='welcome'>
+    </div>
+    <div id='image'>
+    </div>
+</main>
+
+<script src="/static/js/profile.js"></script>
+{% endif %}
+
+{% endblock %}

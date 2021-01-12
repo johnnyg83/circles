@@ -36,6 +36,7 @@ def get_all_interests():
     all_interests = list(set([x.interest for x in all_interests]))
     data = {'all_interests': all_interests}
     return jsonify(data)
+    #TODO show online users and total users with interest? 
 
 #TODO: authentication
 
