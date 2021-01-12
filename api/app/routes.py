@@ -99,7 +99,7 @@ def logout():
     return redirect(url_for("home"))
 
 @app.route('/test') 
-def home():
+def test():
     db.drop_all()
     db.create_all()
     chris = User(id="chris", name="chris", email="chris.yao@yale.edu")
