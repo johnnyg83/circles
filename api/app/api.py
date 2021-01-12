@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, json
+from flask_login import current_user
 from . import db
 from .models import User, Interest
 from util import fail, succ
@@ -44,9 +45,13 @@ def user_data():
         id = request.args['id']
     else:
         return "Error: No id field provided. Please specify an id."
-    user = User.query.get(id)
-    if user is None:
-        return "Error: No user found with given id"
+    
+    if id == 'CURRENT':
+        user = current_user
+    else:
+        user = User.query.get(id)
+        if user is None:
+            return "Error: No user found with given id"
     data = user.get_all_data()
     return jsonify(data)
 
@@ -55,15 +60,16 @@ def add_user_interest():
     if 'id' in request.args:
         id = request.args['id']
     else:
-        return "Error: No id field provided. Please specify an id."
-    
+        return json.dumps("Error: No id field provided. Please specify an id.")
     if 'interest' in request.args:
         interest = request.args['interest']
     else:
-        return "Error: No interest field provided. Please specify an interest to add."
-
-    user = User.query.get(id)
-    return str(user.add_interest(interest, 0))
+        return json.dumps("Error: No interest field provided. Please specify an interest to add.")
+    if id == 'CURRENT':
+        user = current_user
+    else:
+        user = User.query.get(id)
+    return json.dumps(user.add_interest(interest, 0))
 
 @api_bp.route('/user/deleteinterest', methods=['POST'])
 def delete_user_interest():
@@ -77,7 +83,11 @@ def delete_user_interest():
     else:
         return "Error: No interest field provided. Please specify an interest to add."
 
-    user = User.query.get(id)
+    if id == 'CURRENT':
+        user = current_user
+    else:
+        user = User.query.get(id)
+
     return str(user.delete_interest(interest, 0))
     
 @api_bp.route('/user/match', methods=['POST'])
