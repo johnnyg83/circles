@@ -113,12 +113,18 @@ def test():
     # db.session.commit()
     # chris.add_friend(john)
     # chris.add_friend(joe)
-    chris = User.query.filter_by(email="chris.yao@yale.edu").first()
-    john = User.query.get("1")
-    joe = User.query.get("2")
-    chris.add_match(john)
-    chris.block_user(john)
+    # chris = User.query.filter_by(email="chris.yao@yale.edu").first()
+    # john = User.query.get("1")
+    # joe = User.query.get("2")
+    # chris.add_match(john)
+    # chris.block_user(john)
 
+    # db.drop_all()
+    # db.create_all()
+    # db.session.commit()
+    # user = User(id = "John Smith", name="John Smith", email = "john.smith@yale.edu", image="/static/images/johnsmith.jpg")
+    # db.session.add(user)
+    # db.session.commit()
     return render_template('home.html')
 
 

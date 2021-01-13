@@ -11,7 +11,9 @@
 #mdc-chip-parent{
   display:none;
 }
-
+#match-dialog-image{
+  width:100px;
+}
 input {
   border: 1px solid transparent;
   background-color: #cac3c3;

@@ -1,9 +1,57 @@
 var chipSetEl = document.querySelector('.mdc-chip-set');
 var chipSet = new mdc.chips.MDCChipSet(chipSetEl);
-const dialog = new mdc.dialog.MDCDialog(document.querySelector('.mdc-dialog'));
-dialog.open();
+const matchDialog = new mdc.dialog.MDCDialog(document.querySelector('.mdc-dialog'));
+async function getAllData(id)
+{
+    result = await fetch('api/user/data?' + new URLSearchParams(
+        {
+            id: id
+        }), 
+        {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+        })
+        .then(response => response.json());
+    return result
+}
+async function match(){
+  var matchData = await fetch('api/user/match?' + new URLSearchParams(
+    {
+        id: 'CURRENT'
+    }), 
+    {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then (function(data){
+      return data;
+    })
+  var ids = matchData['ids'];
+  console.log(ids);
+  var matchedId = ids[0];
+  otherUserData = await getAllData(matchedId);
+  console.log(otherUserData);
+  customizeMatchDialog(otherUserData, matchData['common_interests'][0]);
+  matchDialog.open();
+}
+function customizeMatchDialog(otherUserData, commonInterests){
+  var dialog = document.querySelector('.mdc-dialog');
+  var title = document.getElementById('match-dialog-title');
+  var details = document.getElementById('match-dialog-details');
+  var image = document.getElementById('match-dialog-image');
+  if (otherUserData['image'] != null){
+    image.src = otherUserData['image']
+  }
+  title.innerHTML = 'You matched with ' + otherUserData['name'] + '!'
+  details.innerHTML = 'Your common interests are: ' + commonInterests;
+  console.log(dialog);
+}
 chipSet.listen('MDCChip:removal',(obj)=>{
-
   chipId = obj['detail']['chipId'];
   var interest = chipId.substring(chipId.indexOf(" ") + 1);
   deleteCurrentUserInterest(interest);
@@ -190,8 +238,7 @@ function deleteCurrentUserInterest(interest){
 fetch('api/all/interests', {
   method: 'POST',
   headers: {
-    'content-type': 'application/json',
-    authorization: 'Bearer 123abc456def'
+    'content-type': 'application/json'
   },
 })
 .then(response => response.json())
