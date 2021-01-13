@@ -1,6 +1,13 @@
-//var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauro","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States of America","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
-const chipSetEl = document.querySelector('.mdc-chip-set');
-const chipSet = new mdc.chips.MDCChipSet(chipSetEl);
+var chipSetEl = document.querySelector('.mdc-chip-set');
+var chipSet = new mdc.chips.MDCChipSet(chipSetEl);
+
+chipSet.listen('MDCChip:removal',(obj)=>{
+
+  chipId = obj['detail']['chipId'];
+  var interest = chipId.substring(chipId.indexOf(" ") + 1);
+  deleteCurrentUserInterest(interest);
+});
+
 async function getCurrentUserInterests(){
     await fetch('api/user/data?' + new URLSearchParams(
         {
@@ -15,11 +22,14 @@ async function getCurrentUserInterests(){
         .then(response => response.json())
         .then (function(data){
             interests = data['interests']
+            for(let i = 0; i < interests.length; i++){
+              interest = interests[i];
+              addChip(interest);
+            }
         });
 }
 
 getCurrentUserInterests();
-
 function addCurrentUserInterest(interest){
     if (interests.includes(interest)){
         return false;
@@ -39,19 +49,18 @@ function addCurrentUserInterest(interest){
         .then(response => response.json());
     return true
 }
+nChips = 0
 function addChip(interest){
-    var parent = document.getElementById("mdc-chip-parent");
-    var clone = parent.cloneNode(true);
-    var textNode = clone.querySelector(".mdc-chip__text")
-    console.log(interest)
-    textNode.innerHTML = interest;
-    console.log(textNode.innerHTML);
-    interestsBox = document.getElementById("chip-box");
-    interestsBox.appendChild(clone);
-    const chipSetEl = document.querySelector('.mdc-chip-set');
-    const chipSet = new mdc.chips.MDCChipSet(chipSetEl);
+  nChips += 1;
+  var parent = document.getElementById("mdc-chip-parent");
+  var clone = parent.cloneNode(true);
+  clone.id += (" " + interest);
+  var textNode = clone.querySelector(".mdc-chip__text");
+  textNode.innerHTML = interest;
+  interestsBox = document.getElementById("chip-box");
+  interestsBox.appendChild(clone);
+  chipSet.addChip(clone);
 }
-addChip("tenderizing");
 function autocomplete(inp, arr) {
     /*the autocomplete function takes two arguments,
     the text field element and an array of possible autocompleted values:*/
@@ -120,6 +129,7 @@ function autocomplete(inp, arr) {
           console.log(flag)
           if(flag == true){
             addChip(val);
+            this.value = "";
           }
         }
     });
@@ -157,7 +167,22 @@ function autocomplete(inp, arr) {
 
 
 function deleteCurrentUserInterest(interest){
-
+  if (interests.includes(interest)){
+    delete interests[interests.indexOf(interest)];
+  }
+  var result = fetch('api/user/deleteinterest?' + new URLSearchParams(
+      {
+          id: 'CURRENT',
+          interest: interest
+      }), 
+      {
+          method: 'POST',
+          headers: {
+              'content-type': 'application/json'
+          },
+      })
+      .then(response => response.json());
+  return true
 }
 
 
