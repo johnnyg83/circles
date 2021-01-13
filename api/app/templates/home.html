@@ -37,6 +37,32 @@
 <div class= "match-button-container">
   <button type="button" class="match-button">Match</button> 
 </div>
+<div class="mdc-dialog">
+  <div class="mdc-dialog__container">
+    <div class="mdc-dialog__surface"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="my-dialog-title"
+      aria-describedby="my-dialog-content">
+      <!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
+      <h2 class="mdc-dialog__title" id="my-dialog-title"><!--
+     -->Choose a Ringtone<!--
+   --></h2>
+      <div class="mdc-dialog__content" id="my-dialog-content">
+        <ul class="mdc-list mdc-list--avatar-list">
+          <li class="mdc-list-item" tabindex="0" data-mdc-dialog-action="none">
+            <span class="mdc-list-item__text">None</span>
+          </li>
+          <li class="mdc-list-item" data-mdc-dialog-action="callisto">
+            <span class="mdc-list-item__text">Callisto</span>
+          </li>
+          <!-- ... -->
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="mdc-dialog__scrim"></div>
+</div>
 {% endif %}
 <script src="/static/js/home.js"></script>
 {% endblock %}

@@ -1,4 +1,7 @@
 @use "@material/chips/mdc-chips";
+@use "@material/dialog";
+
+@include dialog.core-styles;
 * { box-sizing: border-box; }
 .autocomplete {
   /*the container must be positioned relative:*/
@@ -8,6 +11,7 @@
 #mdc-chip-parent{
   display:none;
 }
+
 input {
   border: 1px solid transparent;
   background-color: #cac3c3;

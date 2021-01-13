@@ -1,6 +1,7 @@
 var chipSetEl = document.querySelector('.mdc-chip-set');
 var chipSet = new mdc.chips.MDCChipSet(chipSetEl);
-
+const dialog = new mdc.dialog.MDCDialog(document.querySelector('.mdc-dialog'));
+dialog.open();
 chipSet.listen('MDCChip:removal',(obj)=>{
 
   chipId = obj['detail']['chipId'];
