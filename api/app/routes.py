@@ -103,7 +103,7 @@ def test():
     db.drop_all()
     db.create_all()
     db.session.commit()
-    user = User(id = "John Smith", name="John Smith", email = "john.smith@yale.edu")
+    user = User(id = "John Smith", name="John Smith", email = "john.smith@yale.edu", image="/static/images/johnsmith.jpg")
     db.session.add(user);
     db.session.commit();
     return render_template('home.html')

@@ -116,11 +116,6 @@ def match():
     data = {'ids':[x[0] for x in sorted_matches], 'n_matches': [x[1] for x in sorted_matches],  'common_interests': [x[2] for x in 
             sorted_matches]}
 
-
-
-
-    data = {'ids': ['John Smith']}
-    print(data)
     return json.dumps(data);
 
 def get_interest_matches(l1, l2, threshold):
