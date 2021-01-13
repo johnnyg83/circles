@@ -140,7 +140,6 @@ def change_profile():
         return json.dumps("Error: No id field provided. Please specify an id.")
     if id == 'CURRENT':
         user = current_user
-    print("Before: ", user.get_all_data())
     try:
         for attribute in request.args:
             if attribute != 'id':
@@ -148,5 +147,4 @@ def change_profile():
                 user.update(attribute, request.args[attribute])
     except NameError:
         return json.dumps("Error: No id")
-    print("After: ", user.get_all_data())
     return json.dumps(True)
