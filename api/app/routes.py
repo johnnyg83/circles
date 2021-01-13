@@ -100,62 +100,8 @@ def logout():
 
 @app.route('/test') 
 def test():
-    db.drop_all()
-    db.create_all()
-    chris = User(id="chris", name="chris", email="chris.yao@yale.edu")
-    john = User(id="john", name="chris", email="john.gunderson@yale.edu")
-    boy = User(id="boy", name="chris", email="boy.gunderson@yale.edu")
-    juice = User(id="juice", name="chris", email="juice.gunderson@yale.edu")
-    db.session.add(chris)
-    db.session.add(john)
-    db.session.add(boy)
-    db.session.add(juice)
-    db.session.commit()
-    # chris.add_interest(interest="tennis", rank=1)
-    # chris.add_interest(interest="tennis", rank=1)
-    # chris.add_interest(interest="breathing", rank=2)
-    # db.session.add(Interest(user_id=chris.id, interest="tennis", rank=1))
-    # db.session.add(Interest(user_id=chris.id, interest="tennis", rank=1))
-    # db.session.add(Interest(user_id=chris.id, interest="breahting", rank=3))
-    # db.session.add(Interest(user_id=chris.id, interest="sleep", rank=4))
-
-    chris.add_friend(john)
-    john.add_friend(chris)
-    # db.session.add(Match(user_id=chris.id, match_id=john.id, time=dt.now()))
-    # db.session.add(BlockedUser(user_id=chris.id, blocked_user_id=john.id))
-    chris.add_interest("surfing", 1)
-    chris.add_interest("surfing", 1)
-    chris.add_interest("surfing", 1)
-    chris.add_interest("surfing", 1)
-    chris.add_interest("surfing", 1)
-    chris.add_interest("eating", 2)
-    chris.add_interest("mokdf", 1)
-    chris.delete_interest("mokdf", 1)
-    chris.delete_interest("eating", 2)
-    chris.delete_interest("penis", 3)
-
-    chris.block_user(john)
-    chris.block_user(boy)
-    boy.block_user(chris)
-    juice.block_user(chris)
-    juice.unblock_user(chris)
-    chris.unblock_user(juice)
-    chris.report_user(boy, "A")
-    boy.report_user(boy, "b")
-    chris.report_user(boy, "c")
-    chris.add_match(boy)
-
-    chris.delete_friend(john)
-    boy.delete_user()
-    print(BlockedUser.query.all())
-    # db.session.delete(chris)
-    db.session.commit()
-
-    
-
-    print(chris.get_all_data())
-    # print(boy.get_reported_by())
-
+    # db.drop_all()
+    # db.create_all()
 
     return render_template('home.html')
 
@@ -163,6 +109,11 @@ def test():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html', authenticated=current_user.is_authenticated)
+
 
 @login_manager.user_loader
 def load_user(user_id):
