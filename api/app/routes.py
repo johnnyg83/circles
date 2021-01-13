@@ -100,8 +100,11 @@ def logout():
 
 @app.route('/test') 
 def test():
-    # db.drop_all()
-    # db.create_all()
+    user = User.query.first()
+    db.drop_all()
+    db.create_all()
+    db.session.add(user)
+    db.session.commit()
 
     return render_template('home.html')
 

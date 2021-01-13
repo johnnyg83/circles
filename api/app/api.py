@@ -131,3 +131,22 @@ def get_interest_matches(l1, l2, threshold):
             break
 
     return n_matches, matches
+
+@api_bp.route('/user/changeprofile', methods=['POST'])
+def change_profile():
+    if 'id' in request.args:
+        id = request.args['id']
+    else:
+        return json.dumps("Error: No id field provided. Please specify an id.")
+    if id == 'CURRENT':
+        user = current_user
+    print("Before: ", user.get_all_data())
+    try:
+        for attribute in request.args:
+            if attribute != 'id':
+                print(attribute, request.args[attribute])
+                user.update(attribute, request.args[attribute])
+    except NameError:
+        return json.dumps("Error: No id")
+    print("After: ", user.get_all_data())
+    return json.dumps(True)

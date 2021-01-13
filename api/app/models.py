@@ -11,7 +11,7 @@ class User(db.Model):
     image = db.Column(db.String(120))
     last_login = db.Column(db.DateTime)
     authenticated = db.Column(db.Boolean, default=False, nullable=False)
-    privacy_setting = db.Column(db.String(20), default="0", nullable=False) #could either be one number, or a "string array" of 1s and 0s for each setting
+    privacy_settings = db.Column(db.String(20), default="0", nullable=False) #could either be one number, or a "string array" of 1s and 0s for each setting
 
     interests = db.relationship("Interest", back_populates="user", cascade="all, delete")
     friends = db.relationship("Friend", back_populates="user", cascade="all, delete")
@@ -47,6 +47,13 @@ class User(db.Model):
 
     def get_id(self):
         return str(self.id)
+    
+    def update(self, attribute, value):
+        if hasattr(self, attribute):
+            setattr(self, attribute, value)
+            db.session.commit()
+            return True
+        return False
 
     def get_instance(self, model, **kwargs):
         """Return first instance found from model"""
@@ -86,19 +93,25 @@ class User(db.Model):
         return [x.interest for x in self.interests]
 
     def delete_interest(self, interest, rank):
-        self.delete_instance(Interest, interest=interest, rank=rank)
+        return self.delete_instance(Interest, interest=interest, rank=rank)
     
     def add_friend(self, friend):
-        self.add_instance(Friend, user_id=self.id, friend_id=friend.id)
+        instance = self.get_instance(Friend, user_id=self.id, friend_id=friend.id)
+        if instance is None:
+            instance = Friend(user_id=self.id, friend_id=friend.id, time=dt.now())
+            db.session.add(instance)
+            db.session.commit()
+            return True
+        return False
 
     def get_friends(self):
-        return [x.friend_id for x in self.friends]
+        return [(x.friend_id, x.time) for x in self.friends]
 
     def delete_friend(self, friend):
-        self.delete_instance(Friend, user_id=self.id, friend_id=friend.id)
+        return self.delete_instance(Friend, user_id=self.id, friend_id=friend.id)
     
     def block_user(self, blocked_user):
-        self.add_instance(BlockedUser, user_id=self.id, blocked_user_id=blocked_user.id)
+        return self.add_instance(BlockedUser, user_id=self.id, blocked_user_id=blocked_user.id)
 
     def get_blocked_users(self): 
         """Return the other users who the user has blocked."""
@@ -110,10 +123,10 @@ class User(db.Model):
         return [x.user_id for x in self.get_all_instances(BlockedUser, blocked_user_id=self.id)]
 
     def unblock_user(self, blocked_user):
-        self.delete_instance(BlockedUser, user_id=self.id, blocked_user_id=blocked_user.id)
+        return self.delete_instance(BlockedUser, user_id=self.id, blocked_user_id=blocked_user.id)
 
     def report_user(self, user, reason):
-        self.add_instance(Report, reporter_id=self.id, reported_id=user.id, time=dt.now(), reason=reason)
+        return self.add_instance(Report, reporter_id=self.id, reported_id=user.id, time=dt.now(), reason=reason)
 
     def get_reported_users(self):
         """Return the other users who the user has reported."""
@@ -124,7 +137,7 @@ class User(db.Model):
         return [(x.reporter_id, x.time) for x in self.get_all_instances(Report, reported_id=self.id)]
 
     def add_match(self, match):
-        self.add_instance(Match, user_id=self.id, match_id=match.id, time=dt.now())
+        return self.add_instance(Match, user_id=self.id, match_id=match.id, time=dt.now())
 
     def get_matches(self):
         return [(x.match_id, x.time) for x in self.get_all_instances(Match, user_id=self.id)]
@@ -132,6 +145,7 @@ class User(db.Model):
     def delete_user(self):
         db.session.delete(self)
         db.session.commit()
+        return True
     
     def get_all_data(self):
         data = {'id': self.id, 'email': self.email, 'name': self.name, 'image': self.image, 
@@ -139,7 +153,7 @@ class User(db.Model):
         "last_login": self.last_login, 'matches': self.get_matches(), 
         'blocked_users': self.get_blocked_users(), 'blocked_by': self.get_blocked_by(), 
         'reported_users': self.get_reported_users(), 'reported_by': self.get_reported_by(),
-        'banned': self.is_banned()}
+        'banned': self.is_banned(), 'privacy_settings': self.privacy_settings}
         return data
 
 class Interest(db.Model):
@@ -161,7 +175,7 @@ class Friend(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(80), db.ForeignKey('users.id'))
     friend_id = db.Column(db.String(80), nullable=False)
-    time = db.Column(db.DateTime)
+    time = db.Column(db.DateTime, nullable=False)
 
     user = db.relationship("User", back_populates="friends")
 
@@ -225,6 +239,8 @@ def ban_user(user_id, time_unbanned, reason):
     if BannedUser.query.filter_by(user_id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned, reason=reason).first() is None:
         db.session.add(BannedUser(user_id=user_id, time_banned=dt.now(), time_unbanned=time_unbanned, reason=reason))
         db.session.commit()
+        return True
+    return False
 
 def unban_user(user_id):
     bans = BannedUser.query.filter(BannedUser.user_id==user_id, BannedUser.time_unbanned > dt.now())
@@ -233,6 +249,7 @@ def unban_user(user_id):
         ban.time_unbanned = dt.now()
         print('unban: ', ban)
     db.session.commit()
+    return True
 
 def get_banned_users():
     return [(x.user_id, x.time_banned, x.time_unbanned) for x in BannedUser.query.all()]
