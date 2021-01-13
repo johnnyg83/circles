@@ -126,7 +126,7 @@ function autocomplete(inp, arr) {
             /*and simulate a click on the "active" item:*/
             if (x) x[currentFocus].click();
           }
-          flag = await addCurrentUserInterest(val);
+          flag = addCurrentUserInterest(val);
           console.log(flag)
           if(flag == true){
             addChip(val);
