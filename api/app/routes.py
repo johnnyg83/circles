@@ -100,12 +100,12 @@ def logout():
 
 @app.route('/test') 
 def test():
-    user = User.query.first()
     db.drop_all()
     db.create_all()
-    db.session.add(user)
     db.session.commit()
-
+    user = User(id = "John Smith", name="John Smith", email = "john.smith@yale.edu")
+    db.session.add(user);
+    db.session.commit();
     return render_template('home.html')
 
 

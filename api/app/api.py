@@ -96,10 +96,14 @@ def match():
     if 'id' in request.args:
         id = request.args['id']
     else:
-        return "Error: No id field provided. Please specify an id."
-    user = User.query.get(id)
+        return json.dumps("Error: No id field provided. Please specify an id.")
+    if id == 'CURRENT':
+        user = current_user
+    else:
+        user = User.query.get(id)
     if user is None:
-        return "Error: No user found with given id"
+        return json.dumps("Error: No user found with given id")
+    
     threshold = 4
     #list of all other users
     all_users = User.query.all()
@@ -112,7 +116,12 @@ def match():
     data = {'ids':[x[0] for x in sorted_matches], 'n_matches': [x[1] for x in sorted_matches],  'common_interests': [x[2] for x in 
             sorted_matches]}
 
-    return jsonify(data)
+
+
+
+    data = {'ids': ['John Smith']}
+    print(data)
+    return json.dumps(data);
 
 def get_interest_matches(l1, l2, threshold):
     #return the number of matching interests between l1, l2 where a match is where distance(x, y) < threshold

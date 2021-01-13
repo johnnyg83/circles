@@ -1,9 +1,43 @@
 var chipSetEl = document.querySelector('.mdc-chip-set');
 var chipSet = new mdc.chips.MDCChipSet(chipSetEl);
-const dialog = new mdc.dialog.MDCDialog(document.querySelector('.mdc-dialog'));
-dialog.open();
+const matchDialog = new mdc.dialog.MDCDialog(document.querySelector('.mdc-dialog'));
+async function getAllData(id)
+{
+    result = await fetch('api/user/data?' + new URLSearchParams(
+        {
+            id: id
+        }), 
+        {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+        })
+        .then(response => response.json());
+    return result
+}
+async function match(){
+  var otherUserData = await fetch('api/user/match?' + new URLSearchParams(
+    {
+        id: 'CURRENT'
+    }), 
+    {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then (async function(data){
+        var ids = data['ids'];
+        console.log(ids);
+        var matchedId = ids[0];
+        return getAllData(matchedId);
+    })
+  console.log(otherUserData);
+  matchDialog.open();
+}
 chipSet.listen('MDCChip:removal',(obj)=>{
-
   chipId = obj['detail']['chipId'];
   var interest = chipId.substring(chipId.indexOf(" ") + 1);
   deleteCurrentUserInterest(interest);
