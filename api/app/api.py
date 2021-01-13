@@ -77,19 +77,19 @@ def delete_user_interest():
     if 'id' in request.args:
         id = request.args['id']
     else:
-        return "Error: No id field provided. Please specify an id."
+        return json.dumps("Error: No id field provided. Please specify an id.")
     
     if 'interest' in request.args:
         interest = request.args['interest']
     else:
-        return "Error: No interest field provided. Please specify an interest to add."
+        return json.dumps("Error: No interest field provided. Please specify an interest to add.")
 
     if id == 'CURRENT':
         user = current_user
     else:
         user = User.query.get(id)
 
-    return str(user.delete_interest(interest, 0))
+    return json.dumps(user.delete_interest(interest, 0))
     
 @api_bp.route('/user/match', methods=['POST'])
 def match():
