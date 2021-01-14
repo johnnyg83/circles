@@ -104,8 +104,10 @@ def test():
     db.create_all()
     db.session.commit()
     user = User(id = "John Smith", name="John Smith", email = "john.smith@yale.edu", image="/static/images/johnsmith.jpg")
-    db.session.add(user);
-    db.session.commit();
+    user.add_interests_from_list(["meat tenderizing", "colonizing", "being a soldier", "writing", "surfing"])
+    db.session.add(user)
+    db.session.commit()
+    print(user.get_interests())
     return render_template('home.html')
 
 

@@ -107,15 +107,15 @@ def match():
     threshold = 4
     #list of all other users
     all_users = User.query.all()
-
+    all_users = [u for u in all_users if not u == user]
     #store (id, num_matching_interests, matching_interests)
     interest_matches = [(u.id,) + get_interest_matches(user.get_interests(), u.get_interests(), threshold) for u in all_users]
-
+    print(interest_matches)
     sorted_matches = sorted(interest_matches, key= lambda x: x[1], reverse=True)
 
     data = {'ids':[x[0] for x in sorted_matches], 'n_matches': [x[1] for x in sorted_matches],  'common_interests': [x[2] for x in 
             sorted_matches]}
-
+    print(data)
     return json.dumps(data);
 
 def get_interest_matches(l1, l2, threshold):
@@ -130,7 +130,7 @@ def get_interest_matches(l1, l2, threshold):
     for x in sorted_matches_with_distances:
         if x[0] < threshold:
             n_matches += 1
-            matches.append(x[1])
+            matches.append(x[1][0]) # the first person's interest
         else:
             break
 

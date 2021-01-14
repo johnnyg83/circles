@@ -36,7 +36,7 @@ async function match(){
   var matchedId = ids[0];
   otherUserData = await getAllData(matchedId);
   console.log(otherUserData);
-  customizeMatchDialog(otherUserData, matchData['common_interests'][0]);
+  customizeMatchDialog(otherUserData, matchData['common_interests'][0].slice(0, 3));
   matchDialog.open();
 }
 function customizeMatchDialog(otherUserData, commonInterests){
@@ -47,8 +47,32 @@ function customizeMatchDialog(otherUserData, commonInterests){
   if (otherUserData['image'] != null){
     image.src = otherUserData['image']
   }
-  title.innerHTML = 'You matched with ' + otherUserData['name'] + '!'
-  details.innerHTML = 'Your common interests are: ' + commonInterests;
+  title.innerHTML = 'You matched with ' + otherUserData['name'] + '!';
+  if(commonInterests.length == 0){
+    detailsString = "";
+  }
+  else if(commonInterests.length == 1){
+    detailsString = "You're both interested in ";
+    detailsString += commonInterests[0] + '.';
+  }
+  else if(commonInterests.length > 1){
+    detailsString = "You're both interested in ";
+    for(let i = 0; i < commonInterests.length; i++){
+      delimiter = ', ';
+      if(i==commonInterests.length - 2){
+        if(commonInterests.length == 2){
+          delimiter = ' and ';
+        }else{
+          delimiter = ', and ';
+        }
+      }else if(i == commonInterests.length - 1){
+        delimiter = '.';
+      }
+      detailsString += commonInterests[i];
+      detailsString += delimiter;
+    }
+  }
+  details.innerHTML = detailsString;
   console.log(dialog);
 }
 chipSet.listen('MDCChip:removal',(obj)=>{

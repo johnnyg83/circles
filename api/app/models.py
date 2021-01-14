@@ -89,6 +89,10 @@ class User(db.Model):
             return False
         return self.add_instance(Interest, user_id=self.id, interest=interest, rank=rank)
 
+    def add_interests_from_list(self, list):
+        for interest in list:
+            self.add_interest(interest, 0)
+            
     def get_interests(self):
         return [x.interest for x in self.interests]
 
