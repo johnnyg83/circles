@@ -1,6 +1,7 @@
 var chipSetEl = document.querySelector('.mdc-chip-set');
 var chipSet = new mdc.chips.MDCChipSet(chipSetEl);
 const matchDialog = new mdc.dialog.MDCDialog(document.querySelector('.mdc-dialog'));
+
 async function getAllData(id)
 {
     result = await fetch('api/user/data?' + new URLSearchParams(
@@ -34,12 +35,37 @@ async function match(){
   var ids = matchData['ids'];
   console.log(ids);
   var matchedId = ids[0];
-  otherUserData = await getAllData(matchedId);
+  var otherUserData = await getAllData(matchedId);
   console.log(otherUserData);
-  customizeMatchDialog(otherUserData, matchData['common_interests'][0].slice(0, 3));
+  var commonInterests = matchData['common_interests'][0].slice(0, 3)
+  var uncommonInterests = matchData['uncommon_interests'][0].slice(0, 3)
+  customizeMatchDialog(otherUserData, commonInterests, uncommonInterests);
   matchDialog.open();
 }
-function customizeMatchDialog(otherUserData, commonInterests){
+function addCommas(arr){
+  result = ""
+  if(arr.length == 1){
+    result += arr[0] + '.';
+  }
+  else if(arr.length > 1){
+    for(let i = 0; i < arr.length; i++){
+      delimiter = ', ';
+      if(i==arr.length - 2){
+        if(arr.length == 2){
+          delimiter = ' and ';
+        }else{
+          delimiter = ', and ';
+        }
+      }else if(i == arr.length - 1){
+        delimiter = '';
+      }
+      result += arr[i];
+      result += delimiter;
+    }
+  }
+  return result;
+}
+function customizeMatchDialog(otherUserData, commonInterests, uncommonInterests){
   var dialog = document.querySelector('.mdc-dialog');
   var title = document.getElementById('match-dialog-title');
   var details = document.getElementById('match-dialog-details');
@@ -48,30 +74,7 @@ function customizeMatchDialog(otherUserData, commonInterests){
     image.src = otherUserData['image']
   }
   title.innerHTML = 'You matched with ' + otherUserData['name'] + '!';
-  if(commonInterests.length == 0){
-    detailsString = "";
-  }
-  else if(commonInterests.length == 1){
-    detailsString = "You're both interested in ";
-    detailsString += commonInterests[0] + '.';
-  }
-  else if(commonInterests.length > 1){
-    detailsString = "You're both interested in ";
-    for(let i = 0; i < commonInterests.length; i++){
-      delimiter = ', ';
-      if(i==commonInterests.length - 2){
-        if(commonInterests.length == 2){
-          delimiter = ' and ';
-        }else{
-          delimiter = ', and ';
-        }
-      }else if(i == commonInterests.length - 1){
-        delimiter = '.';
-      }
-      detailsString += commonInterests[i];
-      detailsString += delimiter;
-    }
-  }
+  detailsString = "You're both interested in " + addCommas(commonInterests) + '. Ask ' + otherUserData['name'] + ' about ' + addCommas(uncommonInterests) + '.';
   details.innerHTML = detailsString;
   console.log(dialog);
 }
@@ -79,6 +82,13 @@ chipSet.listen('MDCChip:removal',(obj)=>{
   chipId = obj['detail']['chipId'];
   var interest = chipId.substring(chipId.indexOf(" ") + 1);
   deleteCurrentUserInterest(interest);
+});
+matchDialog.listen('MDCDialog:closing', (obj) =>{
+  action = obj['detail']['action'];
+  console.log(action);
+  if(action == "accept"){
+    window.location.href = "/match";
+  }
 });
 
 async function getCurrentUserInterests(){

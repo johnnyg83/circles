@@ -115,6 +115,9 @@ def test():
 def about():
     return render_template('about.html')
 
+@app.route('/match')
+def match():
+    return render_template('match.html')
 @app.route('/profile')
 def profile():
     return render_template('profile.html', authenticated=current_user.is_authenticated)

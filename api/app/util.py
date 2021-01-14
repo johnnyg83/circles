@@ -18,3 +18,5 @@ def fail(message, code=400):
         }),
         code
     )
+def remove_duplicates(lst):
+    return list(dict.fromkeys(lst))

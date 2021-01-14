@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, json
 from flask_login import current_user
 from . import db
 from .models import User, Interest
-from util import fail, succ
+from .util import fail, succ, remove_duplicates
 from Levenshtein import distance
 from itertools import product
 api_bp = Blueprint('api', __name__)
@@ -104,7 +104,7 @@ def match():
     if user is None:
         return json.dumps("Error: No user found with given id")
     
-    threshold = 4
+    threshold = 100 #max out for now
     #list of all other users
     all_users = User.query.all()
     all_users = [u for u in all_users if not u == user]
@@ -112,9 +112,12 @@ def match():
     interest_matches = [(u.id,) + get_interest_matches(user.get_interests(), u.get_interests(), threshold) for u in all_users]
     print(interest_matches)
     sorted_matches = sorted(interest_matches, key= lambda x: x[1], reverse=True)
+    print(sorted_matches)
+    common_interests = [remove_duplicates(t) for t in [x[2] for x in sorted_matches]]
+    uncommon_interests = [list(reversed(remove_duplicates(t))) for t in [x[3] for x in sorted_matches]]
 
-    data = {'ids':[x[0] for x in sorted_matches], 'n_matches': [x[1] for x in sorted_matches],  'common_interests': [x[2] for x in 
-            sorted_matches]}
+    data = {'ids':[x[0] for x in sorted_matches], 'n_matches': [x[1] for x in sorted_matches], 
+     'common_interests': common_interests, 'uncommon_interests': uncommon_interests}
     print(data)
     return json.dumps(data);
 
@@ -126,15 +129,17 @@ def get_interest_matches(l1, l2, threshold):
     sorted_matches_with_distances = sorted(distances, key=lambda x:x[0])
     print(sorted_matches_with_distances)
     n_matches = 0
-    matches = []
+    matches_user = []
+    matches_other = []
     for x in sorted_matches_with_distances:
         if x[0] < threshold:
             n_matches += 1
-            matches.append(x[1][0]) # the first person's interest
+            matches_user.append(x[1][0]) # the first person's interest
+            matches_other.append(x[1][1]) # the second person's interest
         else:
             break
 
-    return n_matches, matches
+    return n_matches, matches_user, matches_other
 
 @api_bp.route('/user/changeprofile', methods=['POST'])
 def change_profile():
