@@ -180,6 +180,7 @@ class Friend(db.Model):
     user_id = db.Column(db.String(80), db.ForeignKey('users.id'))
     friend_id = db.Column(db.String(80), nullable=False)
     time = db.Column(db.DateTime, nullable=False)
+    #TODO fix time, it's in GMT and i think it's wrong
 
     user = db.relationship("User", back_populates="friends")
 

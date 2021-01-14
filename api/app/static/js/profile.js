@@ -2,72 +2,107 @@ profileMain()
 
 async function profileMain() {
     var data = await getAllData();
-    changeProfile({
-        "name": "john boy juice",
-        "privacy_settings": "1,2,3,4,5"
-    })
     if (data.banned) {
         displayBanned();
     } else {
-        displayProfile(data);
+        displayProfile();
         displayButtons();
     }
-}
 
-async function getAllData()
-{
-    result = await fetch('api/user/data?' + new URLSearchParams(
-        {
-            id: 'CURRENT'
-        }), 
-        {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-        })
-        .then(response => response.json());
-    return result
-}
+    async function getAllData(id='CURRENT')
+    {
+        result = await fetch('api/user/data?' + new URLSearchParams(
+            {
+                id: id
+            }), 
+            {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json'
+                },
+            })
+            .then(response => response.json());
+        return result
+    }
 
-function getElement(id) {
-    return document.getElementById(id);
-}
+    function getElement(id) {
+        return document.getElementById(id);
+    }
 
-function displayBanned() {
-    getElement('welcome-container').innerText = "You are not welcome, " + data.name + ". You are banned.";
-}
+    function displayBanned() {
+        getElement('welcome-container').innerText = "You are not welcome, " + data.name + ". You are banned.";
+    }
 
-function displayProfile(data) {
-    let welcome = getElement('welcome-container');
-    welcome.innerText = "Welcome, " + data.name + "!";
-    let name = getElement('name-container');
-    name.innerText = "Name: " + data.name;
-    let email = getElement('email-container');
-    email.innerText = "Email: " + data.email;
-    let pfp = getElement('profile-picture');
-    pfp.src = data.image;
-    let privacySettings = getElement('privacy-settings-container');
-    privacySettings.innerText = "Privacy: " + data.privacy_settings;
-    let friends = getElement('friends-container');
-    friends.innerText = "Friends: [is an array]";
-    let matches = getElement('matches-container');
-    matches.innerText = "Matches: [is an array]";
-    let blockedUsers = getElement('blocked-users-container');
-    blockedUsers.innerText = "Blocked Users: [is an array]";
-}
+    async function displayProfile() {
+        var data = await getAllData();
+        let welcomeContainer = getElement('welcome-container');
+        welcomeContainer.innerText = "Welcome, " + data.name + "!";
+        let nameContainer = getElement('name-container');
+        nameContainer.innerText = "Name: " + data.name;
+        let emailContainer = getElement('email-container');
+        emailContainer.innerText = "Email: " + data.email;
+        let pfpContainer = getElement('profile-picture');
+        pfpContainer.src = data.image;
+        let privacySettingsContainer = getElement('privacy-settings-container');
+        privacySettingsContainer.innerText = "Privacy: " + data.privacy_settings;
+        displayFriends();
+        displayMatches(); 
+        displayBlockedUsers();
+    }
 
-function changeProfile(dict) {
-    dict['id'] = 'CURRENT';
-    fetch('api/user/changeprofile?' + new URLSearchParams(dict), 
-        {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-        });
-}
+    async function displayFriends() {
+        let friends = await getAllData()
+            .then(response => response.friends);
+        let friendsContainer = getElement('friends-container');
+        for (var i = 0; i < friends.length; i++) {
+            let friendDiv = document.createElement("div");
+            friendDiv.className = "friend";
+            let friendData = await getAllData(friends[i][0])
+            friendDiv.innerText = "Friend #" + (i + 1) + ": " + friendData.name + '; Time friended: ' + friends[i][1]; 
+            friendsContainer.appendChild(friendDiv);
+        }
+    }
 
-function displayButtons() {
-    let pfpButton = document.createElement("BUTTON");
+    async function displayMatches() {
+        let matches = await getAllData()
+            .then(response => response.matches);
+        let matchesContainer = getElement('matches-container');
+        for (var i = 0; i < matches.length; i++) {
+            let matchesDiv = document.createElement("div");
+            matchesDiv.className = "match";
+            let matchData = await getAllData(matches[i][0])
+            matchesDiv.innerText = "Match #" + (i + 1) + ": " + matchData.name + '; Time matched: ' + matches[i][1]; 
+            matchesContainer.appendChild(matchesDiv);
+        }
+    }
+
+    async function displayBlockedUsers() {
+        let blockedUsers = await getAllData()
+            .then(response => response.blocked_users);
+        let blockedUsersContainer = getElement('blocked-users-container');
+        for (var i = 0; i < blockedUsers.length; i++) {
+            let blockedUserDiv = document.createElement("div");
+            blockedUserDiv.className = "blocked-user";
+            let blockedUserData = await getAllData(blockedUsers[i][0])
+            blockedUserDiv.innerText = "Blocked user #" + (i + 1) + ": " + blockedUserData.name; 
+            blockedUsersContainer.appendChild(blockedUserDiv);
+        }
+    }
+
+    async function changeProfile(dict) {
+        dict['id'] = 'CURRENT';
+        await fetch('api/user/changeprofile?' + new URLSearchParams(dict), 
+            {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json'
+                },
+            });
+        displayProfile()
+    }
+
+    function displayButtons() {
+        let pfpButton = document.createElement("BUTTON");
+    }
+
 }
