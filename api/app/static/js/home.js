@@ -17,6 +17,22 @@ async function getAllData(id)
         .then(response => response.json());
     return result
 }
+async function addMatch(matchId)
+{
+    result = await fetch('api/user/addmatch?' + new URLSearchParams(
+        {
+            id: 'CURRENT',
+            match_id: matchId
+        }), 
+        {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+        })
+        .then(response => response.json());
+    return result;
+}
 async function match(){
   var matchData = await fetch('api/user/match?' + new URLSearchParams(
     {
@@ -34,7 +50,7 @@ async function match(){
     })
   var ids = matchData['ids'];
   console.log(ids);
-  var matchedId = ids[0];
+  matchedId = ids[0];
   var otherUserData = await getAllData(matchedId);
   console.log(otherUserData);
   var commonInterests = matchData['common_interests'][0].slice(0, 3)
@@ -88,6 +104,8 @@ matchDialog.listen('MDCDialog:closing', (obj) =>{
   console.log(action);
   if(action == "accept"){
     window.location.href = "/match";
+    console.log(matchedId);
+    addMatch(matchedId);
   }
 });
 

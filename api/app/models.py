@@ -18,6 +18,8 @@ class User(db.Model):
     matches = db.relationship("Match", back_populates="user", cascade="all, delete")
     blocked_users = db.relationship("BlockedUser", back_populates="user", cascade="all, delete")
 
+    credentials = db.Column(db.PickleType())
+
     def is_active(self):
         """True, as all users are active."""
         return True
@@ -141,7 +143,7 @@ class User(db.Model):
         return [(x.reporter_id, x.time) for x in self.get_all_instances(Report, reported_id=self.id)]
 
     def add_match(self, match):
-        return self.add_instance(Match, user_id=self.id, match_id=match.id, time=dt.now())
+        return self.add_instance(Match, user_id=self.id, match_id=match.match_id, time=dt.now())
 
     def get_matches(self):
         return [(x.match_id, x.time) for x in self.get_all_instances(Match, user_id=self.id)]
