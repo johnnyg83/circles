@@ -5,7 +5,9 @@ from .models import User, Interest, Match
 from .util import fail, succ, remove_duplicates, credentials_to_dict
 from Levenshtein import distance
 from datetime import datetime as dt
+from datetime import timedelta
 from itertools import product
+from uuid import uuid4
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient
@@ -145,10 +147,18 @@ def change_profile():
 @api_bp.route('/createmeeting', methods=['POST'])
 def create_meeting():
     user = get_user_from_request()
+    if 'other_id' in request.args:
+        other_id = request.args['other_id']
+    else:
+        return json.dumps("Error: No other id provided. Please specify the other person's id.")
+
+    other_user = User.query.get(other_id)
+    if other_user is None:
+        return json.dumps("Error: Other user not found.")
+    
     if user.credentials is None:
-        return json.dumps('failed, no credentials')
+        return json.dumps('Error: No credentials.')
     creds = user.credentials
-    print(creds)
     # Load credentials from the session.
     credentials = google.oauth2.credentials.Credentials(
         **user.credentials)
@@ -157,23 +167,37 @@ def create_meeting():
         'calendar', 'v3', credentials=credentials)
 
     now = dt.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
-    events_result = calendar.events().list(calendarId='primary', timeMin=now,
-                                        maxResults=10, singleEvents=True,
-                                        orderBy='startTime').execute()
-    events = events_result.get('items', [])
+    hour_from_now = (dt.utcnow() + timedelta(hours=1)).isoformat() + 'Z'
+    event = {
+        'summary': 'Circles Meeting',
+        'location': '800 Howard St., San Francisco, CA 94103',
+        'description': 'A chance to meet someone new.',
+        'start': {
+            'dateTime': now,
+            'timeZone': 'America/Los_Angeles',
+        },
+        'end': {
+            'dateTime': hour_from_now,
+            'timeZone': 'America/Los_Angeles',
+        },
+        "conferenceData": {"createRequest": {"requestId": f"{uuid4().hex}",
+                                                      "conferenceSolutionKey": {"type": "hangoutsMeet"}}},
+        'attendees': [
+            {'email': user.email},
+            {'email': 'chris.yao@yale.edu'},
+        ],
+        'reminders': {
+            'useDefault': False,
+        'overrides': [
+            {'method': 'email', 'minutes': 24 * 60},
+            {'method': 'popup', 'minutes': 10},
+        ],
+        },
+    }
 
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        print(event)
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['creator'])
-
-
-    # Save credentials back to session in case access token was refreshed.
-    # ACTION ITEM: In a production app, you likely want to save these
-    #              credentials in a persistent database instead.
+    event = calendar.events().insert(calendarId='primary', body=event, conferenceDataVersion=1).execute()
+    uri = event.get('conferenceData')['entryPoints'][0]['uri']
+    print(uri)
+    print ('Event created' +  uri)
     user.credentials = credentials_to_dict(credentials)
-
-    return json.dumps('done')
+    return json.dumps(uri)
