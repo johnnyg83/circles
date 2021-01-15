@@ -170,7 +170,6 @@ def create_meeting():
     hour_from_now = (dt.utcnow() + timedelta(hours=1)).isoformat() + 'Z'
     event = {
         'summary': 'Circles Meeting',
-        'location': '800 Howard St., San Francisco, CA 94103',
         'description': 'A chance to meet someone new.',
         'start': {
             'dateTime': now,
@@ -184,7 +183,7 @@ def create_meeting():
                                                       "conferenceSolutionKey": {"type": "hangoutsMeet"}}},
         'attendees': [
             {'email': user.email},
-            {'email': 'chris.yao@yale.edu'},
+            {'email': other_user.email},
         ],
         'reminders': {
             'useDefault': False,

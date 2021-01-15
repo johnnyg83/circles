@@ -1,10 +1,10 @@
 async function main(){
-    async function createMeeting(id)
+    async function createMeeting()
     {
         result = await fetch('api/createmeeting?' + new URLSearchParams(
             {
                 id: 'CURRENT',
-                other_id: id
+                other_id: window.matchedId
             }), 
             {
                 method: 'POST',

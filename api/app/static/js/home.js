@@ -103,6 +103,7 @@ matchDialog.listen('MDCDialog:closing', (obj) =>{
   action = obj['detail']['action'];
   console.log(action);
   if(action == "accept"){
+    window.matchedId = matchedId;
     window.location.href = "/match";
     console.log(matchedId);
     addMatch(matchedId);
