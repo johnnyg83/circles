@@ -53,13 +53,16 @@ async function match(){
   var otherUserData = await getAllData(matchedId);
   var commonInterests = matchData['common_interests'][0].slice(0, 3)
   var uncommonInterests = matchData['uncommon_interests'][0].slice(0, 3)
+  //TODO: make this better
+  sessionStorage.setItem('commonInterests', JSON.stringify(commonInterests))
+  sessionStorage.setItem('uncommonInterests', JSON.stringify(uncommonInterests))
   customizeMatchDialog(otherUserData, commonInterests, uncommonInterests);
   matchDialog.open();
 }
 function addCommas(arr){
   result = ""
   if(arr.length == 1){
-    result += arr[0] + '.';
+    result += arr[0];
   }
   else if(arr.length > 1){
     for(let i = 0; i < arr.length; i++){

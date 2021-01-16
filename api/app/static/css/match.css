@@ -1,3 +1,10 @@
 #meeting-info{
     display:none;
 }
+.match-info{
+    display:none;
+}
+#match-profile-picture{
+    width: 8em;
+    height: 8em;
+}

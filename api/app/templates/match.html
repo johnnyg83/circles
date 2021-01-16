@@ -4,8 +4,13 @@
 {% endblock %}
 {% block content %}
 <h1> Match </h1>
-<script src="static/js/match.js"></script>
+<div class="match-info">
+    <h3 id="match-name"></h3>
+    <img id="match-profile-picture" src="">
+    <p id= "match-description"></p>
+</div>
 <button id="create-meeting-button" onclick="onCreateMeetingButton()">Create Meeting</button>
 <p id="meeting-info">Meeting created! <a id="meeting-link" href="">Click here</a> to join.
 </p>
+<script src="static/js/match.js"></script>
 {% endblock %}
