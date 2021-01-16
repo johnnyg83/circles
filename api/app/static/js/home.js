@@ -49,10 +49,8 @@ async function match(){
       return data;
     })
   var ids = matchData['ids'];
-  console.log(ids);
   matchedId = ids[0];
   var otherUserData = await getAllData(matchedId);
-  console.log(otherUserData);
   var commonInterests = matchData['common_interests'][0].slice(0, 3)
   var uncommonInterests = matchData['uncommon_interests'][0].slice(0, 3)
   customizeMatchDialog(otherUserData, commonInterests, uncommonInterests);
@@ -103,7 +101,7 @@ matchDialog.listen('MDCDialog:closing', (obj) =>{
   action = obj['detail']['action'];
   console.log(action);
   if(action == "accept"){
-    window.matchedId = matchedId;
+    sessionStorage.setItem('matchedId', matchedId);
     window.location.href = "/match";
     console.log(matchedId);
     addMatch(matchedId);
