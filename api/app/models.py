@@ -99,7 +99,7 @@ class User(db.Model):
         return [x.interest for x in self.interests]
 
     def delete_interest(self, interest, rank):
-        return self.delete_instance(Interest, interest=interest, rank=rank)
+        return self.delete_instance(Interest, interest=interest, rank=rank, user_id=self.id)
     
     def add_friend(self, friend):
         instance = self.get_instance(Friend, user_id=self.id, friend_id=friend.id)

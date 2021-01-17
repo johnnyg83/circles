@@ -95,21 +95,39 @@ def add_match():
     match = Match(user_id=user.id, match_id=matched_id, time = dt.now())
 
     return json.dumps(user.add_match(match))
+    
+#this is a black box for now @chris
 @api_bp.route('/user/match', methods=['POST'])
 def match():
     user = get_user_from_request()
     
-    threshold = 100 #max out for now
+    threshold = 3 #max out for now
     #list of all other users
     all_users = User.query.all()
     all_users = [u for u in all_users if not u == user]
     #store (id, num_matching_interests, matching_interests)
     interest_matches = [(u.id,) + get_interest_matches(user.get_interests(), u.get_interests(), threshold) for u in all_users]
-    sorted_matches = sorted(interest_matches, key= lambda x: x[1], reverse=True)
-    common_interests = [remove_duplicates(t) for t in [x[2] for x in sorted_matches]]
-    uncommon_interests = [list(reversed(remove_duplicates(t))) for t in [x[3] for x in sorted_matches]]
-
-    data = {'ids':[x[0] for x in sorted_matches], 'n_matches': [x[1] for x in sorted_matches], 
+    sorted_matched_users = sorted(interest_matches, key= lambda x: x[1], reverse=True)
+    common_interests = []
+    uncommon_interests = []
+    for data in sorted_matched_users:
+        user_common_interests = []
+        user_uncommon_interests = []
+        first_persons_interests = remove_duplicates(data[2])
+        second_persons_interests = remove_duplicates(data[3])
+        for pair in first_persons_interests:
+            score = pair[1]
+            interest = pair[0]
+            if score < threshold:
+                user_common_interests.append(interest)
+        for pair in reversed(second_persons_interests):
+            interest = pair[0]
+            user_uncommon_interests.append(interest)
+        user_common_interests = remove_duplicates(user_common_interests)
+        user_uncommon_interests = remove_duplicates(user_uncommon_interests)
+        common_interests.append(user_common_interests)
+        uncommon_interests.append(user_uncommon_interests)
+    data = {'ids':[x[0] for x in sorted_matched_users], 'n_matches': [x[1] for x in sorted_matched_users], 
      'common_interests': common_interests, 'uncommon_interests': uncommon_interests}
     return json.dumps(data)
 
@@ -117,20 +135,18 @@ def get_interest_matches(l1, l2, threshold):
     #return the number of matching interests between l1, l2 where a match is where distance(x, y) < threshold
     #and the matches themselves
     combinations = list(product(l1, l2))
-    distances = [(distance(x[0], x[1]), x) for x in combinations]
-    sorted_matches_with_distances = sorted(distances, key=lambda x:x[0])
+    matches_with_distances = [(distance(x[0], x[1]), x) for x in combinations]
+    sorted_matches_with_distances = sorted(matches_with_distances, key=lambda x:x[0])
     n_matches = 0
-    matches_user = []
-    matches_other = []
+    matched_interests_user = []
+    matched_interests_other = []
     for x in sorted_matches_with_distances:
         if x[0] < threshold:
             n_matches += 1
-            matches_user.append(x[1][0]) # the first person's interest
-            matches_other.append(x[1][1]) # the second person's interest
-        else:
-            break
+        matched_interests_user.append((x[1][0], x[0])) # the first person's interest w/ distance
+        matched_interests_other.append((x[1][1], x[0])) # the second person's interest w/ distance
 
-    return n_matches, matches_user, matches_other
+    return n_matches, matched_interests_user, matched_interests_other
 
 @api_bp.route('/user/changeprofile', methods=['POST'])
 def change_profile():
